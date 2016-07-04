@@ -12,6 +12,11 @@ build:
 
     # Gets the dependencies
     - script:
+        name: install libpcap-dev
+        code: |
+          sudo apt-get install libpcap-dev
+
+    - script:
         name: go get
         code: |
           go get
