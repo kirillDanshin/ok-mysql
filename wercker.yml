@@ -1,4 +1,4 @@
-box: kirilldanshin/golang@1.6.2
+box: kirilldanshin/golang
 
 build:
   # The steps that will be executed on build
