@@ -14,7 +14,7 @@ build:
     - script:
         name: install libpcap-dev
         code: |
-          sudo apt-get install libpcap-dev
+          sudo apt-cache search libpcap
 
     - script:
         name: go get
