@@ -27,7 +27,7 @@ func main() {
 	// 	// initConfig(*configDir, *configName) //PLANNING<kirillDanshin>
 	// 	return
 	// }
-	// dLog("cfg.AllSettings(): %#+v\n", cfg.AllSettings())
+	// dlog.F("cfg.AllSettings(): %#+v\n", cfg.AllSettings())
 
 	flag.Parse()
 

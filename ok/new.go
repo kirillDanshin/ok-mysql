@@ -14,6 +14,7 @@ func newInst(cfg *Config) (*Instance, error) {
 	}
 	var (
 		snaplen = cfg.SnapshotLength
+		Lazy    = cfg.Lazy
 	)
 	if snaplen == 0 {
 		log.Printf("using default SnapshotLength %v for %v", defaults.SnapLen, cfg.Address)
@@ -31,5 +32,6 @@ func newInst(cfg *Config) (*Instance, error) {
 	return &Instance{
 		Addr:    addr,
 		SnapLen: snaplen,
+		Lazy:    Lazy,
 	}, nil
 }
