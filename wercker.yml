@@ -1,8 +1,4 @@
-box: golang
-
-# Gets the dependencies
-script: |
-  sudo apt-cache search libpcap
+box: kirilldanshin/box-golang
 
 build:
   # The steps that will be executed on build
