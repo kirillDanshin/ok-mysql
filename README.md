@@ -2,6 +2,9 @@
 
 MySQL query time logger
 
+# Requirements to run
+Needs to run under root user.
+
 # Compiling dev branch
 ### Release
 ```
