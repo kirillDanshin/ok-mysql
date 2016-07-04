@@ -1,5 +1,9 @@
 box: golang
 
+# Gets the dependencies
+script: |
+  sudo apt-cache search libpcap
+
 build:
   # The steps that will be executed on build
   # Steps make up the actions in your pipeline
@@ -11,11 +15,6 @@ build:
     - setup-go-workspace
 
     # Gets the dependencies
-    - script:
-        name: install libpcap-dev
-        code: |
-          sudo apt-cache search libpcap
-
     - script:
         name: go get
         code: |
