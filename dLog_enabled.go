@@ -10,7 +10,7 @@ func dLogd(v ...interface{}) {
 	}
 }
 
-func dLogf(f, v ...interface{}) {
+func dLogf(f string, v ...interface{}) {
 	log.Printf(f, v...)
 }
 
