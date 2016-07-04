@@ -2,15 +2,14 @@
 // for ok-mysql
 package defaults
 
-import "time"
+import "github.com/google/gopacket/pcap"
 
 const (
 	// SnapLen is default pcap snaphost length
 	SnapLen int32 = 65535
 
 	// Timeout is default pcap timeout
-	// Timeout = pcap.BlockForever
-	Timeout = time.Second * 30
+	Timeout = pcap.BlockForever
 
 	// Promiscuous is default promiscuous mode status
 	Promiscuous = false
