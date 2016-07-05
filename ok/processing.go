@@ -2,7 +2,7 @@ package ok
 
 import (
 	"fmt"
-	"strconv"
+	"log"
 
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
@@ -35,39 +35,44 @@ func (i *Instance) processPacket(packet gopacket.Packet) {
 		nextDecoder.Decode(newip4.Payload, pb)
 	}
 
+	t := packet.Metadata().Timestamp
+	log.Println("time:", t.UnixNano())
+
 	bb := bytebufferpool.Get()
 	defer func() {
+		defer recover()
 		syncPrint <- fmt.Sprintf("bb.B: %s", bb.B)
-		syncPrint <- fmt.Sprintf("packet: %s", packet)
-		syncPrint <- fmt.Sprintf("data: %s", packet.Data())
+		// syncPrint <- fmt.Sprintf("packet: %s", packet)
+		syncPrint <- fmt.Sprintf("packet data: %s", packet.Data())
+		bb.Reset()
 		bytebufferpool.Put(bb)
 	}()
 	// Let's see if the packet is an ethernet packet
-	ethernetLayer := packet.Layer(layers.LayerTypeEthernet)
-	if ethernetLayer != nil {
-		fmt.Fprintln(bb, "Ethernet layer detected.")
-		ethernetPacket, _ := ethernetLayer.(*layers.Ethernet)
-		fmt.Fprintln(bb, "Source MAC: ", ethernetPacket.SrcMAC)
-		fmt.Fprintln(bb, "Destination MAC: ", ethernetPacket.DstMAC)
-		// Ethernet type is typically IPv4 but could be ARP or other
-		fmt.Fprintln(bb, "Ethernet type: ", ethernetPacket.EthernetType)
-		fmt.Fprintln(bb)
-	}
+	// ethernetLayer := packet.Layer(layers.LayerTypeEthernet)
+	// if ethernetLayer != nil {.
+	// 	fmt.Fprintln(bb, "Ethernet layer detected.")
+	// 	ethernetPacket, _ := ethernetLayer.(*layers.Ethernet)
+	// 	fmt.Fprintln(bb, "Source MAC: ", ethernetPacket.SrcMAC)
+	// 	fmt.Fprintln(bb, "Destination MAC: ", ethernetPacket.DstMAC)
+	// 	// Ethernet type is typically IPv4 but could be ARP or other
+	// 	fmt.Fprintln(bb, "Ethernet type: ", ethernetPacket.EthernetType)
+	// 	fmt.Fprintln(bb)
+	// }
 
 	// Let's see if the packet is IP (even though the ether type told us)
-	ipLayer := packet.Layer(layers.LayerTypeIPv4)
-	if ipLayer != nil {
-		fmt.Fprintln(bb, "IPv4 layer detected.")
-		ip, _ := ipLayer.(*layers.IPv4)
-		// IP layer variables:
-		// Version (Either 4 or 6)
-		// IHL (IP Header Length in 32-bit words)
-		// TOS, Length, Id, Flags, FragOffset, TTL, Protocol (TCP?),
-		// Checksum, SrcIP, DstIP
-		fmt.Fprintf(bb, "From %s to %s\n", ip.SrcIP, ip.DstIP)
-		fmt.Fprintln(bb, "Protocol: ", ip.Protocol)
-		fmt.Fprintln(bb)
-	}
+	// ipLayer := packet.Layer(layers.LayerTypeIPv4)
+	// if ipLayer != nil {
+	// 	fmt.Fprintln(bb, "IPv4 layer detected.")
+	// 	ip, _ := ipLayer.(*layers.IPv4)
+	// 	// IP layer variables:
+	// 	// Version (Either 4 or 6)
+	// 	// IHL (IP Header Length in 32-bit words)
+	// 	// TOS, Length, Id, Flags, FragOffset, TTL, Protocol (TCP?),
+	// 	// Checksum, SrcIP, DstIP
+	// 	fmt.Fprintf(bb, "From %s to %s\n", ip.SrcIP, ip.DstIP)
+	// 	fmt.Fprintln(bb, "Protocol: ", ip.Protocol)
+	// 	fmt.Fprintln(bb)
+	// }
 
 	// Let's see if the packet is TCP
 	tcpLayer := packet.Layer(layers.LayerTypeTCP)
@@ -80,42 +85,42 @@ func (i *Instance) processPacket(packet gopacket.Packet) {
 		// Bool flags: FIN, SYN, RST, PSH, ACK, URG, ECE, CWR, NS
 		fmt.Fprintf(bb, "From port %d to %d\n", tcp.SrcPort, tcp.DstPort)
 		fmt.Fprintln(bb, "Sequence number: ", tcp.Seq)
+		fmt.Fprintln(bb, "FIN: ", tcp.FIN)
+		fmt.Fprintln(bb, "SYN: ", tcp.SYN)
+		fmt.Fprintln(bb, "RST: ", tcp.RST)
+		fmt.Fprintln(bb, "PSH: ", tcp.PSH)
+		fmt.Fprintln(bb, "ACK: ", tcp.ACK, "n=", tcp.Ack)
+		fmt.Fprintln(bb, "URG: ", tcp.URG)
+		fmt.Fprintln(bb, "ECE: ", tcp.ECE)
+		fmt.Fprintln(bb, "CWR: ", tcp.CWR)
+		fmt.Fprintln(bb, "NS:  ", tcp.NS)
 		fmt.Fprintln(bb)
 
 		// little hacky \x00 decoding
-		s, _ := strconv.Unquote(fmt.Sprintf(`"%s"`, string(tcp.LayerPayload())))
-		fmt.Fprintf(bb, "tcp.LayerContents(): %#+v", s)
-		fmt.Fprintln(bb)
+		// s, _ := strconv.Unquote(fmt.Sprintf(`"%s"`, string(tcp.LayerPayload())))
+		// fmt.Fprintf(bb, "tcp.LayerContents(): %#+v", s)
+		// fmt.Fprintln(bb)
 	}
 
 	// Iterate over all layers, printing out each layer type
-	fmt.Fprintln(bb, "All packet layers:")
-	for _, layer := range packet.Layers() {
-		fmt.Fprintln(bb, "- ", layer.LayerType())
-	}
+	// fmt.Fprintln(bb, "All packet layers:")
+	// for _, layer := range packet.Layers() {
+	// 	fmt.Fprintln(bb, "- ", layer.LayerType())
+	// }
 
 	// When iterating through packet.Layers() above,
 	// if it lists Payload layer then that is the same as
 	// this applicationLayer. applicationLayer contains the payload
-	applicationLayer := packet.ApplicationLayer()
-	if applicationLayer != nil {
-		fmt.Fprintln(bb, "Application layer/Payload found.")
-		// fmt.Printf("%s\n", applicationLayer.Payload())
-		parsePacket(applicationLayer)
-	}
+	// applicationLayer := packet.ApplicationLayer()
+	// if applicationLayer != nil {
+	// 	fmt.Fprintln(bb, "Application layer/Payload found.")
+	// 	// fmt.Printf("%s\n", applicationLayer.Payload())
+	// 	parsePacket(applicationLayer)
+	// }
 
 	// Check for errors
 	if err := packet.ErrorLayer(); err != nil {
 		fmt.Fprintln(bb, "Error decoding some part of the packet:", err)
 	}
 
-}
-
-func parsePacket(app gopacket.ApplicationLayer) error {
-	syncPrint <- fmt.Sprintf("contents: %+#v\n\n", app.LayerContents())
-	syncPrint <- fmt.Sprintf("layer payload: %+#v\n\n", app.LayerPayload())
-	syncPrint <- fmt.Sprintf("payload: %+#v\n\n", app.Payload())
-	syncPrint <- fmt.Sprintf("%s\n\n\n\n\n", app.LayerType())
-
-	return nil
 }

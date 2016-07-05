@@ -1,5 +1,5 @@
 package ok
 
 var (
-	syncPrint = make(chan string, 128)
+	syncPrint = make(chan string, 1024)
 )

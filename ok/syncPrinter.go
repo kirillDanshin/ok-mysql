@@ -1,10 +1,13 @@
 package ok
 
-import "github.com/kirillDanshin/dlog"
+import (
+	"github.com/kirillDanshin/dlog"
+	"github.com/kirillDanshin/myutils"
+)
 
 func syncPrinter(c chan string) {
 	for s := range c {
-		dlog.Ln(s)
-		dlog.P("\n\n\n\n")
+		// continue
+		dlog.Ln(myutils.Concat(s, "\n\n\n\n"))
 	}
 }

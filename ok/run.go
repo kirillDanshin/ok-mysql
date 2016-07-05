@@ -37,7 +37,7 @@ func (i *Instance) Run() error {
 	}
 	defer handle.Close()
 
-	filter := fmt.Sprintf("port %d", port)
+	filter := fmt.Sprintf("ip and port %d", port)
 	err = handle.SetBPFFilter(filter)
 	if err != nil {
 		log.Fatal(err)
