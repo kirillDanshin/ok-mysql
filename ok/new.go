@@ -8,6 +8,14 @@ import (
 	"github.com/kirillDanshin/ok-mysql/defaults"
 )
 
+// NewInstance is a constructor for Instance
+func NewInstance(config *Config) (*Instance, error) {
+	if config == nil {
+		return nil, fmt.Errorf("Instance config required, nil provided")
+	}
+	return newInst(config)
+}
+
 func newInst(cfg *Config) (*Instance, error) {
 	if cfg.Address == "" {
 		return nil, fmt.Errorf("Can't use empty address")
