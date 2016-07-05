@@ -8,24 +8,10 @@ import (
 	"github.com/kirillDanshin/myutils"
 	"github.com/kirillDanshin/ok-mysql/defaults"
 
-	"net"
-
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/ip4defrag"
 	"github.com/google/gopacket/pcap"
 )
-
-// Config for ok-mysql
-type Config struct {
-	// Address to read from
-	Address string
-
-	// SnapshotLength for pcap packet capture
-	SnapshotLength int32
-
-	// Lazy?
-	Lazy bool
-}
 
 // NewInstance is a constructor for Instance
 func NewInstance(config *Config) (*Instance, error) {
@@ -33,16 +19,6 @@ func NewInstance(config *Config) (*Instance, error) {
 		return nil, fmt.Errorf("Instance config required, nil provided")
 	}
 	return newInst(config)
-}
-
-// Instance instance
-type Instance struct {
-	Addr    *net.TCPAddr
-	SnapLen int32
-	// Lazy?
-	Lazy bool
-
-	defragger *ip4defrag.IPv4Defragmenter
 }
 
 // Run the instance
@@ -74,7 +50,7 @@ func (i *Instance) Run() error {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Only capturing port 3306 packets.")
+	dlog.Ln("Only capturing port 3306 packets.")
 
 	go syncPrinter(syncPrint)
 
@@ -97,25 +73,6 @@ func (i *Instance) Run() error {
 	close(syncPrint)
 
 	dlog.F("Processed %d packets (%d bytes)", count, bytes)
-
-	// ifaces, err := net.Interfaces()
-	// if err != nil {
-	// 	return err
-	// }
-	//
-	// var wg sync.WaitGroup
-	// for _, iface := range ifaces {
-	// 	wg.Add(1)
-	// 	go func(iface net.Interface) {
-	// 		defer wg.Done()
-	// 		if err := scan(&iface); err != nil {
-	// 			log.Printf("interface %v: %v", iface.Name, err)
-	// 		}
-	// 	}(iface)
-	// }
-	//
-	// // wait for all interfaces' scan to complete.
-	// wg.Wait()
 
 	return nil
 }

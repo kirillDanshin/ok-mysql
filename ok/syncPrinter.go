@@ -1,14 +1,10 @@
 package ok
 
-import "fmt"
-
-var (
-	syncPrint = make(chan string, 128)
-)
+import "github.com/kirillDanshin/dlog"
 
 func syncPrinter(c chan string) {
 	for s := range c {
-		fmt.Println(s)
-		fmt.Print("\n\n\n\n")
+		dlog.Ln(s)
+		dlog.P("\n\n\n\n")
 	}
 }

@@ -111,17 +111,11 @@ func (i *Instance) processPacket(packet gopacket.Packet) {
 
 }
 
-var i int
-
 func parsePacket(app gopacket.ApplicationLayer) error {
 	syncPrint <- fmt.Sprintf("contents: %+#v\n\n", app.LayerContents())
 	syncPrint <- fmt.Sprintf("layer payload: %+#v\n\n", app.LayerPayload())
 	syncPrint <- fmt.Sprintf("payload: %+#v\n\n", app.Payload())
 	syncPrint <- fmt.Sprintf("%s\n\n\n\n\n", app.LayerType())
-	// i++
-	// if i == 2 {
-	// 	os.Exit(0)
-	// }
 
 	return nil
 }
