@@ -96,8 +96,6 @@ func (i *Instance) processPacket(packet gopacket.Packet) {
 		bdlog.Ln("CWR: ", tcp.CWR)
 		bdlog.Ln("NS:  ", tcp.NS)
 		bdlog.Ln()
-	} else {
-		fmt.Println("else :c")
 	}
 
 	// Check for errors
