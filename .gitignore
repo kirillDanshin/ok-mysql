@@ -1,6 +1,7 @@
 ok-mysql
 version.go
 .imdone
+out
 
 # Compiled Object files, Static and Dynamic libs (Shared Objects)
 *.o
