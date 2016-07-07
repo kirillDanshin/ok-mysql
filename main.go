@@ -5,35 +5,19 @@ import (
 
 	"github.com/kirillDanshin/myutils"
 	"github.com/kirillDanshin/ok-mysql/ok"
-	"github.com/spf13/viper"
 )
 
 var (
-	cfg = viper.New()
-
-	configDir        = flag.String("configDir", ".", "path to yaml config file")
-	configName       = flag.String("configName", "config", "yaml config file without extension")
-	initConfigNeeded = flag.Bool("init", false, "init config file")
+	addr = flag.String("addr", "", "address to listen (required)")
 )
 
 func main() {
-	// flag.Parse()
-	// cfg.AddConfigPath(*configDir)
-	// cfg.SetConfigName(*configName)
-	// cfg.SetConfigType("yaml")
-	// cfg.ReadInConfig()
-	//
-	// if *initConfigNeeded {
-	// 	// initConfig(*configDir, *configName) //PLANNING<kirillDanshin>
-	// 	return
-	// }
-	// dlog.F("cfg.AllSettings(): %#+v\n", cfg.AllSettings())
-
 	flag.Parse()
+	myutils.RequiredStrFatal("address", *addr)
 
 	instance, err := ok.NewInstance(
 		&ok.Config{
-			Address: "127.0.0.1:3306",
+			Address: *addr,
 		},
 	)
 	myutils.LogFatalError(err)
