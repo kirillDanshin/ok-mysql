@@ -54,12 +54,13 @@ func (i *Instance) Run() error {
 	count := 0
 	bytes := int64(0)
 	// start := time.Now()
+	go i.processPackets()
 	for packet := range pSrc.Packets() {
 		count++
 		bytes += int64(len(packet.Data()))
 		// fmt.Printf("%s\n\n\n", string(packet.Data()))
 
-		i.processPacket(packet)
+		i.queue <- packet
 	}
 
 	close(syncPrint)

@@ -3,7 +3,10 @@ package ok
 import (
 	"fmt"
 	"net"
+	"runtime"
 
+	"github.com/google/gopacket"
+	"github.com/ivpusic/grpool"
 	"github.com/kirillDanshin/dlog"
 	"github.com/kirillDanshin/ok-mysql/defaults"
 )
@@ -37,9 +40,17 @@ func newInst(cfg *Config) (*Instance, error) {
 		return nil, err
 	}
 
+	numCPU := runtime.NumCPU()
+	if numCPU > 2 { // we want to work faster but don't use much CPU
+		numCPU = 2
+	}
+
 	return &Instance{
-		Addr:    addr,
-		SnapLen: snaplen,
-		Lazy:    Lazy,
+		Addr:     addr,
+		SnapLen:  snaplen,
+		Lazy:     Lazy,
+		registry: make(registry),
+		queue:    make(chan gopacket.Packet, 1024),
+		pool:     grpool.NewPool(numCPU, 1024),
 	}, nil
 }
