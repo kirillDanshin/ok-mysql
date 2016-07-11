@@ -2,8 +2,6 @@ package ok
 
 import (
 	"net"
-	"sync"
-	"time"
 
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/ip4defrag"
@@ -33,27 +31,27 @@ type (
 		defragger *ip4defrag.IPv4Defragmenter
 		device    string
 
-		registry registry
-		pool     *grpool.Pool
-		queue    chan gopacket.Packet
+		// registry registry
+		pool  *grpool.Pool
+		queue chan gopacket.Packet
 	}
 
 	// map[ip:port][]packetInfo
-	registry map[string]*packets
+	// registry map[string]*packets
 
-	packets struct {
-		info []packetInfo
-
-		mtx *sync.Mutex
-	}
-
-	packetSrc uint
-
-	packetInfo struct {
-		From packetSrc
-		Time time.Time
-		ACK  bool
-		Ack  uint32
-		FIN  bool
-	}
+	// packets struct {
+	// 	info []packetInfo
+	//
+	// 	mtx *sync.Mutex
+	// }
+	//
+	// packetSrc uint
+	//
+	// packetInfo struct {
+	// 	From packetSrc
+	// 	Time time.Time
+	// 	ACK  bool
+	// 	Ack  uint32
+	// 	FIN  bool
+	// }
 )

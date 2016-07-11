@@ -2,12 +2,10 @@ package ok
 
 import (
 	"fmt"
-	"sync"
 
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/kirillDanshin/dlog"
-	"github.com/kirillDanshin/myutils"
 )
 
 func (i *Instance) processPackets() {
@@ -69,28 +67,28 @@ func (i *Instance) processPacket(packet gopacket.Packet) {
 		bdlog.Ln("TCP layer detected")
 		tcp, _ := tcpLayer.(*layers.TCP)
 		t := packet.Metadata().Timestamp
-		dst := myutils.Concat(ip.DstIP.String(), ":", tcp.DstPort.String())
+		// dst := myutils.Concat(ip.DstIP.String(), ":", tcp.DstPort.String())
 		// i.registry[dst] = append(i.registry[dst], packetInfo{Time: t, Ack: tcp.Ack, ACK: tcp.ACK, FIN: tcp.FIN})
-		if i.registry[dst] == nil {
-			i.registry[dst] = &packets{
-				info: make([]packetInfo, 8),
-				mtx:  &sync.Mutex{},
-			}
-		}
-		i.registry[dst].mtx.Lock()
+		// if i.registry[dst] == nil {
+		// 	i.registry[dst] = &packets{
+		// 		info: make([]packetInfo, 8),
+		// 		mtx:  &sync.Mutex{},
+		// 	}
+		// }
+		// i.registry[dst].mtx.Lock()
 		// if len(i.registry[dst].info) == cap(i.registry[dst].info)-2 {
 		// 	i.registry[dst].info = i.registry[dst].info[:len(i.registry[dst].info)*2]
 		// }
-		i.registry[dst].info = append(
-			i.registry[dst].info,
-			packetInfo{
-				Time: t,
-				Ack:  tcp.Ack,
-				ACK:  tcp.ACK,
-				FIN:  tcp.FIN,
-			},
-		)
-		i.registry[dst].mtx.Unlock()
+		// i.registry[dst].info = append(
+		// 	i.registry[dst].info,
+		// 	packetInfo{
+		// 		Time: t,
+		// 		Ack:  tcp.Ack,
+		// 		ACK:  tcp.ACK,
+		// 		FIN:  tcp.FIN,
+		// 	},
+		// )
+		// i.registry[dst].mtx.Unlock()
 
 		fmt.Println("time=[", t.UnixNano(), "] dest=[", ip.DstIP, tcp.DstPort, "] src=[", ip.SrcIP, tcp.SrcPort, "] ACK=[", tcp.ACK, "] ACK n=[", tcp.Ack, "] PSH=[", tcp.PSH, "] FIN=[", tcp.FIN, "]")
 		// TCP layer variables:
