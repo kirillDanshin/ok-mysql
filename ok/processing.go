@@ -2,6 +2,7 @@ package ok
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
@@ -13,7 +14,10 @@ func (i *Instance) processPackets() {
 	for packet := range i.queue {
 		i.pool.WaitCount(1)
 		i.pool.JobQueue <- func() {
-			defer i.pool.JobDone()
+			defer func() {
+				recover()
+				i.pool.JobDone()
+			}()
 			i.processPacket(packet)
 		}
 	}
@@ -29,16 +33,16 @@ func (i *Instance) processPacket(packet gopacket.Packet) {
 	l := ip4.Length
 	newip4, err := i.defragger.DefragIPv4(ip4)
 	if err != nil {
-		dlog.Ln("Error while defragging", err)
+		dlogClr.Ln("Error while defragging", err)
 	} else if newip4 == nil {
-		dlog.Ln("Recieved a fragment")
+		dlogClr.Ln("Recieved a fragment")
 		return
 	}
 	if newip4.Length != l {
-		dlog.F("Decoding re-assembled packet: %s\n", newip4.NextLayerType())
+		dlogClr.F("Decoding re-assembled packet: %s\n", newip4.NextLayerType())
 		pb, ok := packet.(gopacket.PacketBuilder)
 		if !ok {
-			dlog.Ln("Error while getting packet builder: it's not a PacketBuilder")
+			dlogClr.Ln("Error while getting packet builder: it's not a PacketBuilder")
 		}
 		nextDecoder := newip4.NextLayerType()
 		nextDecoder.Decode(newip4.Payload, pb)
@@ -47,7 +51,7 @@ func (i *Instance) processPacket(packet gopacket.Packet) {
 	bdlog := dlog.NewBuffered()
 	defer func() {
 		defer recover()
-		defer bdlog.Release()
+		bdlog.Release()
 		// syncPrint <- fmt.Sprintf("packet: %s", packet)
 		syncPrint <- fmt.Sprintf("packet data: %s", packet.Data())
 	}()
@@ -67,8 +71,16 @@ func (i *Instance) processPacket(packet gopacket.Packet) {
 		t := packet.Metadata().Timestamp
 		dst := myutils.Concat(ip.DstIP.String(), ":", tcp.DstPort.String())
 		// i.registry[dst] = append(i.registry[dst], packetInfo{Time: t, Ack: tcp.Ack, ACK: tcp.ACK, FIN: tcp.FIN})
-
-		i.registry[dst].Lock()
+		if i.registry[dst] == nil {
+			i.registry[dst] = &packets{
+				info: make([]packetInfo, 8),
+				mtx:  &sync.Mutex{},
+			}
+		}
+		i.registry[dst].mtx.Lock()
+		// if len(i.registry[dst].info) == cap(i.registry[dst].info)-2 {
+		// 	i.registry[dst].info = i.registry[dst].info[:len(i.registry[dst].info)*2]
+		// }
 		i.registry[dst].info = append(
 			i.registry[dst].info,
 			packetInfo{
@@ -78,7 +90,7 @@ func (i *Instance) processPacket(packet gopacket.Packet) {
 				FIN:  tcp.FIN,
 			},
 		)
-		i.registry[dst].Unlock()
+		i.registry[dst].mtx.Unlock()
 
 		fmt.Println("time=[", t.UnixNano(), "] dest=[", ip.DstIP, tcp.DstPort, "] src=[", ip.SrcIP, tcp.SrcPort, "] ACK=[", tcp.ACK, "] ACK n=[", tcp.Ack, "] PSH=[", tcp.PSH, "] FIN=[", tcp.FIN, "]")
 		// TCP layer variables:

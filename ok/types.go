@@ -44,7 +44,7 @@ type (
 	packets struct {
 		info []packetInfo
 
-		sync.Mutex
+		mtx *sync.Mutex
 	}
 
 	packetSrc uint
