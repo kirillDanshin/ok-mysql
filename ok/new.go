@@ -7,7 +7,6 @@ import (
 
 	"github.com/google/gopacket"
 	"github.com/ivpusic/grpool"
-	"github.com/kirillDanshin/dlog"
 	"github.com/kirillDanshin/ok-mysql/defaults"
 )
 
@@ -28,7 +27,7 @@ func newInst(cfg *Config) (*Instance, error) {
 		Lazy    = cfg.Lazy
 	)
 	if snaplen == 0 {
-		dlog.F("using default SnapshotLength %v for %v", defaults.SnapLen, cfg.Address)
+		dlogClr.F("using default SnapshotLength %v for %v", defaults.SnapLen, cfg.Address)
 		if defaults.SnapLen == 0 {
 			return nil, fmt.Errorf("config.SnapshotLength equals to zero and no valid default value provided")
 		}

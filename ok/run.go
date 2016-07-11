@@ -3,9 +3,10 @@ package ok
 import (
 	"fmt"
 	"log"
+	"time"
 
-	"github.com/kirillDanshin/dlog"
 	"github.com/kirillDanshin/myutils"
+	"github.com/kirillDanshin/netutils"
 	"github.com/kirillDanshin/ok-mysql/defaults"
 
 	"github.com/google/gopacket"
@@ -18,7 +19,6 @@ func (i *Instance) Run() error {
 	defer myutils.CPUProf()()
 
 	var (
-		device      = "lo" //TODO <kirilldanshin> device founder
 		snapLen     = i.SnapLen
 		promiscuous = defaults.Promiscuous
 		timeout     = defaults.Timeout
@@ -28,10 +28,18 @@ func (i *Instance) Run() error {
 		port = i.Addr.Port
 	)
 
+	i.device, err = netutils.FindIfaceWithAddr(i.Addr.IP.String(), true)
+	myutils.LogFatalError(err)
+	dlogClr.F("found %s interface", i.device)
 	i.defragger = ip4defrag.NewIPv4Defragmenter()
 
 	// Open device
-	handle, err = pcap.OpenLive(device, snapLen, promiscuous, timeout)
+	handle, err = pcap.OpenLive(
+		i.device,
+		snapLen,
+		promiscuous,
+		timeout,
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -42,7 +50,7 @@ func (i *Instance) Run() error {
 	if err != nil {
 		log.Fatal(err)
 	}
-	dlog.Ln("Only capturing port 3306 packets.")
+	dlogClr.F("Only capturing port %d packets.", port)
 
 	go syncPrinter(syncPrint)
 
@@ -53,19 +61,20 @@ func (i *Instance) Run() error {
 	pSrc.Lazy = i.Lazy
 	count := 0
 	bytes := int64(0)
-	// start := time.Now()
+	start := time.Now()
+	i.registry = make(registry, 128)
 	go i.processPackets()
 	for packet := range pSrc.Packets() {
 		count++
 		bytes += int64(len(packet.Data()))
-		// fmt.Printf("%s\n\n\n", string(packet.Data()))
 
 		i.queue <- packet
 	}
 
 	close(syncPrint)
 
-	dlog.F("Processed %d packets (%d bytes)", count, bytes)
+	dlogClr.F("Processed %d packets (%d bytes)", count, bytes)
+	dlogClr.F("Uptime %s", time.Since(start))
 
 	return nil
 }
