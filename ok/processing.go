@@ -89,7 +89,6 @@ func (i *Instance) processPacket(packet gopacket.Packet) {
 		// 	},
 		// )
 		// i.registry[dst].mtx.Unlock()
-
 		fmt.Println("time=[", t.UnixNano(), "] dest=[", ip.DstIP, tcp.DstPort, "] src=[", ip.SrcIP, tcp.SrcPort, "] ACK=[", tcp.ACK, "] ACK n=[", tcp.Ack, "] PSH=[", tcp.PSH, "] FIN=[", tcp.FIN, "]")
 		// TCP layer variables:
 		// SrcPort, DstPort, Seq, Ack, DataOffset, Window, Checksum, Urgent
