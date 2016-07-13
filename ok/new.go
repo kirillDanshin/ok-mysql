@@ -45,11 +45,10 @@ func newInst(cfg *Config) (*Instance, error) {
 	}
 
 	return &Instance{
-		Addr:     addr,
-		SnapLen:  snaplen,
-		Lazy:     Lazy,
-		registry: make(registry),
-		queue:    make(chan gopacket.Packet, 1024),
-		pool:     grpool.NewPool(numCPU, 1024),
+		Addr:    addr,
+		SnapLen: snaplen,
+		Lazy:    Lazy,
+		queue:   make(chan gopacket.Packet, 1024),
+		pool:    grpool.NewPool(numCPU, 1024),
 	}, nil
 }

@@ -62,7 +62,6 @@ func (i *Instance) Run() error {
 	count := 0
 	bytes := int64(0)
 	start := time.Now()
-	i.registry = make(registry, 128)
 	go i.processPackets()
 	for packet := range pSrc.Packets() {
 		count++
